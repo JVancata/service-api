@@ -10,7 +10,6 @@ const port = 3001;
 const mysql = require('mysql2/promise');
 let connection;
 
-
 const { STATUS_OK, STATUS_ERROR } = require('./enum/statuses.js');
 
 app.use(cors());
@@ -55,6 +54,10 @@ app.get('/heartbeat', async (req, res) => {
 });
 
 app.get('/token', async (req, res) => {
+    res.statusCode = 400;
+    res.send("Use the provided console script.");
+    return;
+
     const { service_id } = req.query;
 
     if (isNaN(service_id)) {
@@ -73,6 +76,7 @@ app.get('/token', async (req, res) => {
 
     const token = jwt.sign({ service_id: rows[0].id }, JWT_SECRET);
     res.send(token);
+
 });
 
 app.get('/services', async (req, res) => {
