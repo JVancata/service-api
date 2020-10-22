@@ -53,6 +53,36 @@ app.get('/heartbeat', async (req, res) => {
     res.send("Updated");
 });
 
+app.get('/error', async (req, res) => {
+    const { token } = req.query;
+    if (!token) {
+        res.statusCode = 401;
+        res.send("Unauthorized - missing token");
+        return;
+    }
+
+    let decoded;
+    try {
+        decoded = jwt.verify(token, JWT_SECRET);
+    }
+    catch {
+        res.statusCode = 401;
+        res.send("Unauthorized");
+        return;
+    }
+
+    const { service_id } = decoded;
+
+    if (!service_id || isNaN(service_id)) {
+        res.statusCode = 400;
+        res.send("Wrong token");
+    }
+
+    await connection.execute('INSERT INTO service_log (service_id, service_status) VALUES (?,?)', [service_id, STATUS_ERROR]);
+
+    res.send("Updated");
+});
+
 app.get('/token', async (req, res) => {
     res.statusCode = 400;
     res.send("Use the provided console script.");
